@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import "@hashgraph/hedera-eth-contracts";
+
 
 contract MirrorNodesContract {
     mapping(uint256 => bytes32) private transactionHistory;
@@ -24,4 +26,38 @@ contract MirrorNodesContract {
     constructor() {
         platformAdmin = msg.sender; // Set the platform admin during contract deployment
     }
+
+
+import "@hashgraph/hedera-eth-contracts";
+
+contract HederaTokenContract {
+    IHederaToken public tokenContract;
+    address public admin;
+
+    event TransactionValidated(address indexed user, uint256 amount);
+
+    constructor(address _tokenContract) {
+        tokenContract = IHederaToken(_tokenContract);
+        admin = msg.sender;
+    }
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Only admin can perform this action");
+        _;
+    }
+
+    function setAdmin(address newAdmin) external onlyAdmin {
+        admin = newAdmin;
+    }
+
+    function validateTransaction(address user, uint256 amount) external onlyAdmin {
+        // Call the token contract to validate the transaction
+        require(tokenContract.balanceOf(user) >= amount, "Insufficient balance");
+        
+        // Perform additional validation logic if needed
+        
+        emit TransactionValidated(user, amount);
+    }
+}
+
 }
